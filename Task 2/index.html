@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Student Dashboard</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f6fb;
+text-align:center;
+}
+
+table{
+margin:auto;
+border-collapse:collapse;
+width:70%;
+}
+
+th,td{
+padding:10px;
+border:1px solid #ddd;
+}
+
+th{
+background:#2a5298;
+color:white;
+}
+
+select,button{
+padding:8px;
+margin:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Student Dashboard</h2>
+
+<select id="departmentFilter" onchange="filterDepartment()">
+<option value="All">All Departments</option>
+<option value="CSE">CSE</option>
+<option value="ECE">ECE</option>
+<option value="MECH">MECH</option>
+</select>
+
+<button onclick="sortName()">Sort by Name</button>
+<button onclick="sortDate()">Sort by Date</button>
+
+<table>
+
+<thead>
+<tr>
+<th>Name</th>
+<th>Department</th>
+<th>Join Date</th>
+</tr>
+</thead>
+
+<tbody id="studentTable"></tbody>
+
+</table>
+
+<h3 id="count"></h3>
+
+<script>
+
+let students=[
+{name:"Arun",dept:"CSE",date:"2023"},
+{name:"Meena",dept:"ECE",date:"2022"},
+{name:"John",dept:"CSE",date:"2024"},
+{name:"Priya",dept:"MECH",date:"2021"}
+];
+
+function display(data){
+
+let table=document.getElementById("studentTable");
+table.innerHTML="";
+
+data.forEach(s=>{
+
+table.innerHTML+=`
+<tr>
+<td>${s.name}</td>
+<td>${s.dept}</td>
+<td>${s.date}</td>
+</tr>
+`;
+
+});
+
+countStudents(data);
+
+}
+
+function sortName(){
+students.sort((a,b)=>a.name.localeCompare(b.name));
+display(students);
+}
+
+function sortDate(){
+students.sort((a,b)=>a.date-b.date);
+display(students);
+}
+
+function filterDepartment(){
+
+let dept=document.getElementById("departmentFilter").value;
+
+if(dept==="All"){
+display(students);
+}else{
+
+let filtered=students.filter(s=>s.dept===dept);
+display(filtered);
+
+}
+
+}
+
+function countStudents(data){
+
+let counts={};
+
+data.forEach(s=>{
+counts[s.dept]=(counts[s.dept]||0)+1;
+});
+
+let text="Students per Department: ";
+
+for(let d in counts){
+text+=d+": "+counts[d]+" ";
+}
+
+document.getElementById("count").innerText=text;
+
+}
+
+display(students);
+
+</script>
+
+</body>
+</html>
