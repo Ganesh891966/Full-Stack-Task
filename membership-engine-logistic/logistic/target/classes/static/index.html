@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Membership Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8b5cf6',
+                        secondary: '#3b82f6',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #2d2d2d 100%); }
+        .glass { backdrop-filter: blur(20px); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+        .hover-scale { transition: transform 0.3s ease; }
+        .hover-scale:hover { transform: scale(1.05); }
+        .fade-in { animation: fadeIn 1s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="text-white font-sans min-h-screen text-lg">
+    <!-- Navigation -->
+    <nav class="glass fixed top-0 w-full z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">SubEngine</div>
+            <div class="hidden md:flex space-x-6">
+                <a href="#pricing" class="hover:text-primary transition">Pricing</a>
+                <a href="#features" class="hover:text-primary transition">Features</a>
+                <a id="dashboard-link" href="#dashboard" class="hover:text-primary transition opacity-50 cursor-not-allowed" onclick="showDashboard()">Dashboard</a>
+                <button id="login-btn" class="bg-primary px-6 py-2 rounded-full hover:bg-secondary transition" onclick="openModal('login')">Login</button>
+                <button id="logout-btn" class="hidden bg-red-500 px-6 py-2 rounded-full hover:bg-red-600 transition" onclick="logout()">Logout</button>
+            </div>
+            <button class="md:hidden" onclick="toggleMenu()"><i class="fas fa-bars text-2xl"></i></button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-24 pb-20 px-6 text-center fade-in">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Unlock Premium Features</h1>
+            <p class="text-xl mb-8 max-w-2xl mx-auto opacity-90">Join thousands of users with our tiered subscription plans. Choose the perfect fit for your needs.</p>
+            <button class="bg-primary text-xl px-12 py-4 rounded-full hover-scale hover:bg-secondary transition font-semibold" onclick="scrollToPricing()">
+                <i class="fas fa-rocket mr-2"></i>Start Your Trial
+            </button>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 px-6">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-16 fade-in">Powerful Features for All Tiers</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass p-8 rounded-2xl hover-scale text-center">
+                    <i class="fas fa-shield-alt text-5xl text-primary mb-4"></i>
+                    <h3 class="text-2xl font-bold mb-4">Secure Auth</h3>
+                    <p>JWT-based login, role-based access across all tiers.</p>
+                </div>
+                <div class="glass p-8 rounded-2xl hover-scale text-center">
+                    <i class="fas fa-chart-line text-5xl text-primary mb-4"></i>
+                    <h3 class="text-2xl font-bold mb-4">Analytics</h3>
+                    <p>Real-time dashboards and insights, advanced in Pro+.</p>
+                </div>
+                <div class="glass p-8 rounded-2xl hover-scale text-center">
+                    <i class="fas fa-users text-5xl text-primary mb-4"></i>
+                    <h3 class="text-2xl font-bold mb-4">Support</h3>
+                    <p>24/7 chat, priority for Enterprise.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 px-6 bg-gradient-to-b from-transparent to-[#0f0f0f]/50">
+        <div class="max-w-6xl mx-auto text-center">
+            <h2 class="text-4xl font-bold mb-4 fade-in">Choose Your Plan</h2>
+            <p class="text-xl mb-12 opacity-90 fade-in">Flexible pricing in INR. Cancel anytime.</p>
+            <div class="flex justify-center mb-8">
+                <label class="mx-2">
+                    <input type="radio" name="billing" value="monthly" checked class="hidden" onchange="toggleBilling()">
+                    <span class="glass px-4 py-2 rounded-full cursor-pointer">Monthly</span>
+                </label>
+                <label class="mx-2">
+                    <input type="radio" name="billing" value="yearly" class="hidden" onchange="toggleBilling()">
+                    <span class="glass px-4 py-2 rounded-full cursor-pointer">Yearly (Save 20%)</span>
+                </label>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto" id="pricing-grid">
+                <!-- Basic Tier -->
+                <div class="glass p-8 rounded-3xl hover-scale relative group" data-tier="basic">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-primary px-6 py-2 rounded-xl font-bold">Popular</div>
+                    <i class="fas fa-circle text-4xl text-green-400 mb-4"></i>
+                    <h3 class="text-2xl font-bold mb-4">Basic</h3>
+                    <div class="text-4xl font-bold mb-2" id="basic-price">₹299<small class="text-lg font-normal">/mo</small></div>
+                    <div class="mb-8 opacity-50" id="basic-yearly">₹2,878/yr</div>
+                    <ul class="text-left mb-8 space-y-2">
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>Basic Analytics</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>Email Support</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>5GB Storage</li>
+                        <li><i class="fas fa-times text-red-400 mr-2"></i>Advanced Reports</li>
+                    </ul>
+                    <button class="w-full bg-primary py-4 rounded-2xl font-bold hover:bg-secondary transition" onclick="selectTier('basic')">
+                        <i class="fas fa-crown mr-2"></i>Get Started
+                    </button>
+                </div>
+                <!-- Pro Tier -->
+                <div class="glass p-8 rounded-3xl hover-scale relative border-2 border-primary/50" data-tier="pro">
+                    <i class="fas fa-crown text-4xl text-yellow-400 mb-4"></i>
+                    <h3 class="text-2xl font-bold mb-4">Pro</h3>
+                    <div class="text-4xl font-bold mb-2" id="pro-price">₹999<small class="text-lg font-normal">/mo</small></div>
+                    <div class="mb-8 opacity-50" id="pro-yearly">₹9,590/yr</div>
+                    <ul class="text-left mb-8 space-y-2">
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>All Basic</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>Advanced Reports</i></li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>50GB Storage</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>Priority Support</li>
+                    </ul>
+                    <button class="w-full bg-primary py-4 rounded-2xl font-bold hover:bg-secondary transition" onclick="selectTier('pro')">
+                        <i class="fas fa-star mr-2"></i>Subscribe Pro
+                    </button>
+                </div>
+                <!-- Enterprise Tier -->
+                <div class="glass p-8 rounded-3xl hover-scale" data-tier="enterprise">
+                    <i class="fas fa-star text-4xl text-orange-400 mb-4"></i>
+                    <h3 class="text-2xl font-bold mb-4">Enterprise</h3>
+                    <div class="text-4xl font-bold mb-2" id="enterprise-price">₹2,999<small class="text-lg font-normal">/mo</small></div>
+                    <div class="mb-8 opacity-50" id="enterprise-yearly">₹28,790/yr</div>
+                    <ul class="text-left mb-8 space-y-2">
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>All Pro</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>Custom Integrations</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>Unlimited Storage</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>24/7 Dedicated Support</li>
+                    </ul>
+                    <button class="w-full bg-gradient-to-r from-primary to-secondary py-4 rounded-2xl font-bold hover-scale transition" onclick="selectTier('enterprise')">
+                        <i class="fas fa-briefcase mr-2"></i>Contact Sales
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Section (Hidden initially) -->
+    <section id="dashboard" class="py-20 px-6 hidden fade-in">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-16">Your Dashboard</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="glass p-8 rounded-3xl">
+                    <h3 class="text-2xl font-bold mb-4" id="user-tier">Welcome, User!</h3>
+                    <p class="mb-4">Current Plan: <span id="current-plan" class="font-bold text-primary"></span></p>
+                    <p>Next Billing: <span id="next-billing" class="opacity-75"></span></p>
+                    <canvas id="usageChart" height="200"></canvas>
+                </div>
+                <div class="glass p-8 rounded-3xl lg:col-span-2">
+                    <h3 class="text-2xl font-bold mb-6">Manage Subscription</h3>
+                    <div class="grid md:grid-cols-3 gap-4 mb-6">
+                        <button class="glass p-4 rounded-xl hover:bg-white/10 transition" onclick="downgrade()">
+                            <i class="fas fa-arrow-down mr-2"></i>Downgrade
+                        </button>
+                        <button class="glass p-4 rounded-xl hover:bg-white/10 transition" onclick="upgrade()">
+                            <i class="fas fa-arrow-up mr-2"></i>Upgrade
+                        </button>
+                        <button class="glass p-4 rounded-xl hover:bg-white/10 transition" onclick="updatePayment()">
+                            <i class="fas fa-credit-card mr-2"></i>Update Card
+                        </button>
+                    </div>
+                    <button class="w-full bg-red-500 py-4 rounded-xl font-bold hover:bg-red-600 transition" onclick="cancelSub()">
+                        <i class="fas fa-times mr-2"></i>Cancel Subscription
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modals -->
+    <div id="modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-6">
+        <div class="glass max-w-md w-full max-h-[90vh] overflow-y-auto rounded-3xl p-8">
+            <div class="flex justify-end mb-6">
+                <button onclick="closeModal()" class="text-2xl hover:text-primary"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-12 px-6 text-center opacity-75">
+        <p>&copy; 2024 SubEngine. All rights reserved. | <a href="#" class="hover:text-primary">Privacy</a> | <a href="#" class="hover:text-primary">Terms</a></p>
+    </footer>
+
+    <script>
+        let currentUser = JSON.parse(localStorage.getItem('subUser')) || null;
+        let selectedTier = null;
+        let isYearly = false;
+
+        // Init
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNav();
+            if (currentUser) {
+                showDashboard();
+                loadChart();
+            }
+        });
+
+        function toggleBilling() {
+            isYearly = document.querySelector('input[name="billing"]:checked').value === 'yearly';
+            updatePrices();
+        }
+
+        function updatePrices() {
+            const tiers = {
+                basic: isYearly ? 2878 : 299,
+                pro: isYearly ? 9590 : 999,
+                enterprise: isYearly ? 28790 : 2999
+            };
+            document.getElementById('basic-price').innerHTML = `₹${tiers.basic}${isYearly ? '<small class="text-lg font-normal">/yr</small>' : '<small class="text-lg font-normal">/mo</small>'}`;
+            document.getElementById('basic-yearly').style.opacity = isYearly ? '1' : '0.5';
+            // Similar for pro and enterprise
+            document.getElementById('pro-price').innerHTML = `₹${isYearly ? 9590 : 999}${isYearly ? '<small>/yr</small>' : '<small>/mo</small>'}`;
+            document.getElementById('pro-yearly').style.opacity = isYearly ? '1' : '0.5';
+            document.getElementById('enterprise-price').innerHTML = `₹${isYearly ? 28790 : 2999}${isYearly ? '<small>/yr</small>' : '<small>/mo</small>'}`;
+            document.getElementById('enterprise-yearly').style.opacity = isYearly ? '1' : '0.5';
+        }
+
+        function selectTier(tier) {
+            selectedTier = tier;
+            const modalContent = `
+                <h2 class="text-3xl font-bold mb-6 text-center">${tier.charAt(0).toUpperCase() + tier.slice(1)} Plan</h2>
+                <p class="text-center mb-8 opacity-75">Complete your subscription to unlock features.</p>
+                <div class="text-center mb-8">
+                    <div class="text-4xl font-bold text-primary mb-2">₹${isYearly ? (tier === 'basic' ? 2878 : tier === 'pro' ? 9590 : 28790) : (tier === 'basic' ? 299 : tier === 'pro' ? 999 : 2999)}</div>
+                    <span>${isYearly ? 'year' : 'month'}</span>
+                </div>
+                <form id="sub-form" class="space-y-4">
+                    <input type="email" id="sub-email" placeholder="Your email" class="w-full p-4 rounded-xl bg-white/10 border border-white/20 focus:outline-none focus:border-primary" required>
+                    <input type="password" id="sub-password" placeholder="Password" class="w-full p-4 rounded-xl bg-white/10 border border-white/20 focus:outline-none focus:border-primary" required>
+                    <button type="submit" class="w-full bg-gradient-to-r from-primary to-secondary py-4 rounded-xl font-bold hover-scale">
+                        <i class="fas fa-credit-card mr-2"></i>Subscribe Now
+                    </button>
+                </form>
+            `;
+            document.getElementById('modal-content').innerHTML = modalContent;
+            openModal('sub');
+            document.getElementById('sub-form').onsubmit = handleSubscribe;
+        }
+
+        function handleSubscribe(e) {
+            e.preventDefault();
+            const email = document.getElementById('sub-email').value;
+            const password = document.getElementById('sub-password').value;
+            if (email && password) {
+                currentUser = { email, tier: selectedTier, billing: isYearly ? 'yearly' : 'monthly', date: new Date().toISOString() };
+                localStorage.setItem('subUser', JSON.stringify(currentUser));
+                closeModal();
+                updateNav();
+                showDashboard();
+                alert(`Subscribed to ${selectedTier}! Welcome aboard.`);
+            }
+        }
+
+        function openModal(type) {
+            if (type === 'login') {
+                document.getElementById('modal-content').innerHTML = `
+                    <h2 class="text-3xl font-bold mb-6 text-center">Welcome Back</h2>
+                    <form id="login-form" class="space-y-4">
+                        <input type="email" id="login-email" placeholder="Email" class="w-full p-4 rounded-xl bg-white/10 border border-white/20 focus:outline-none focus:border-primary" required>
+                        <input type="password" id="login-password" placeholder="Password" class="w-full p-4 rounded-xl bg-white/10 border border-white/20 focus:outline-none focus:border-primary" required>
+                        <button type="submit" class="w-full bg-primary py-4 rounded-xl font-bold hover:bg-secondary">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Login
+                        </button>
+                    </form>
+                    <p class="text-center mt-4">Don't have account? <a href="#" onclick="openModal('register')" class="text-primary hover:underline">Register</a></p>
+                `;
+                document.getElementById('login-form').onsubmit = handleLogin;
+            } else if (type === 'register') {
+                // Similar form for register, calls handleRegister similar to subscribe
+                document.getElementById('modal-content').innerHTML = `
+                    <h2 class="text-3xl font-bold mb-6 text-center">Create Account</h2>
+                    <form id="reg-form" class="space-y-4">
+                        <input type="text" id="reg-name" placeholder="Full Name" class="w-full p-4 rounded-xl bg-white/10 border border-white/20 focus:outline-none focus:border-primary" required>
+                        <input type="email" id="reg-email" placeholder="Email" class="w-full p-4 rounded-xl bg-white/10 border border-white/20 focus:outline-none focus:border-primary" required>
+                        <input type="password" id="reg-password" placeholder="Password" class="w-full p-4 rounded-xl bg-white/10 border border-white/20 focus:outline-none focus:border-primary" required>
+                        <button type="submit" class="w-full bg-primary py-4 rounded-xl font-bold hover:bg-secondary">
+                            <i class="fas fa-user-plus mr-2"></i>Register
+                        </button>
+                    </form>
+                `;
+                document.getElementById('reg-form').onsubmit = function(e) {
+                    e.preventDefault();
+                    // Simulate register, then login
+                    handleLogin.call(this, e); // Reuse login logic post-register
+                };
+            }
+            document.getElementById('modal').classList.remove('hidden');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email')?.value || document.getElementById('reg-email').value;
+            const password = document.getElementById('login-password')?.value || document.getElementById('reg-password').value;
+            // Simulate auth check
+            if (email && password) {
+                if (!currentUser || currentUser.email !== email) {
+                    currentUser = { email, tier: 'basic', billing: 'monthly' }; // Default on first login
+                    localStorage.setItem('subUser', JSON.stringify(currentUser));
+                }
+                closeModal();
+                updateNav();
+                showDashboard();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+        }
+
+        function updateNav() {
+            const loginBtn = document.getElementById('login-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const dashboardLink = document.getElementById('dashboard-link');
+            if (currentUser) {
+                loginBtn.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+                dashboardLink.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                loginBtn.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
+                dashboardLink.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.querySelector('section:not(#dashboard)').classList.add('hidden'); // Hide others? Nah, but scroll
+            window.scrollTo({ top: document.getElementById('dashboard').offsetTop - 100, behavior: 'smooth' });
+            if (currentUser) {
+                document.getElementById('current-plan').textContent = currentUser.tier.toUpperCase();
+                document.getElementById('user-tier').textContent = `Welcome, ${currentUser.email}!`;
+                const nextDate = new Date(new Date(currentUser.date).getTime() + (currentUser.billing === 'yearly' ? 365 : 30) * 24 * 60 * 60 * 1000);
+                document.getElementById('next-billing').textContent = nextDate.toLocaleDateString();
+            }
+            loadChart();
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('subUser');
+            updateNav();
+            document.getElementById('dashboard').classList.add('hidden');
+            alert('Logged out successfully.');
+        }
+
+        function scrollToPricing() {
+            document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function loadChart() {
+            const ctx = document.getElementById('usageChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Usage', 'Remaining'],
+                        datasets: [{ data: [65, 35], backgroundColor: ['#8b5cf6', '#3b82f6'] }]
+                    },
+                    options: { responsive: true, plugins: { legend: { labels: { color: 'white' } } } }
+                });
+            }
+        }
+
+        function upgrade() { alert('Upgrade modal would open. Simulated.'); }
+        function downgrade() { alert('Downgrade confirmed? Simulated.'); }
+        function updatePayment() { alert('Payment update form. Simulated.'); }
+        function cancelSub() { if(confirm('Cancel subscription?')) { logout(); alert('Cancelled.'); } }
+
+        // Mobile menu stub
+        function toggleMenu() { alert('Mobile menu toggle.'); }
+    </script>
+</body>
+</html>
+
