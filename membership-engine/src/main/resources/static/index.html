@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Membership Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8b5cf6',
+                        secondary: '#3b82f6',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #2d2d2d 100%); }
+        .glass { backdrop-filter: blur(20px); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+        .hover-scale { transition: transform 0.3s ease; }
+        .hover-scale:hover { transform: scale(1.05); }
+        .fade-in { animation: fadeIn 1s ease-in; }
+    </style>
+</head>
+
+<body class="text-white font-sans min-h-screen text-lg">
+
+<!-- (ALL YOUR HTML SAME — NOT CHANGED) -->
+
+<!-- KEEP EVERYTHING SAME UNTIL SCRIPT -->
+
+<script>
+let currentUser = JSON.parse(localStorage.getItem('subUser')) || null;
+let selectedTier = null;
+let isYearly = false;
+
+// INIT
+document.addEventListener('DOMContentLoaded', function() {
+    updateNav();
+    if (currentUser) {
+        showDashboard();
+        loadChart();
+    }
+});
+
+// 🔥 UPDATED LOGIN
+async function handleLogin(e) {
+    e.preventDefault();
+
+    const email = document.getElementById('login-email')?.value || document.getElementById('reg-email').value;
+    const password = document.getElementById('login-password')?.value || document.getElementById('reg-password').value;
+
+    try {
+        const res = await fetch('http://localhost:8080/users/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        currentUser = data.user;
+        localStorage.setItem('subUser', JSON.stringify(currentUser));
+
+        closeModal();
+        updateNav();
+        showDashboard();
+
+    } catch (err) {
+        alert("Login failed");
+    }
+}
+
+// 🔥 UPDATED SUBSCRIBE
+async function handleSubscribe(e) {
+    e.preventDefault();
+
+    const email = document.getElementById('sub-email').value;
+    const password = document.getElementById('sub-password').value;
+
+    try {
+        const loginRes = await fetch('http://localhost:8080/users/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        const userData = await loginRes.json();
+        const userId = userData.user.id;
+
+        let planId = selectedTier === 'basic' ? 1 :
+                     selectedTier === 'pro' ? 2 : 3;
+
+        await fetch(`http://localhost:8080/subscriptions?userId=${userId}&planId=${planId}`, {
+            method: 'POST'
+        });
+
+        currentUser = { ...userData.user, tier: selectedTier };
+        localStorage.setItem('subUser', JSON.stringify(currentUser));
+
+        closeModal();
+        updateNav();
+        showDashboard();
+
+        alert("Subscribed successfully!");
+
+    } catch (err) {
+        alert("Subscription failed");
+    }
+}
+
+// (ALL OTHER FUNCTIONS SAME — NOT CHANGED)
+</script>
+
+</body>
+</html>
