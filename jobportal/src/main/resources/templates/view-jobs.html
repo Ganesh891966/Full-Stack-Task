@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Jobs</title>
+
+<style>
+body {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    font-family: 'Segoe UI';
+    color: white;
+}
+
+.container {
+    width: 80%;
+    margin: 50px auto;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: rgba(255,255,255,0.05);
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: scale(1.02);
+    background: rgba(255,255,255,0.08);
+}
+
+.title {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.company {
+    color: #38bdf8;
+}
+
+.btn {
+    margin-top: 10px;
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(90deg, #3b82f6, #7c3aed);
+    color: white;
+    cursor: pointer;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+    <h1>🚀 Available Jobs</h1>
+
+    <!-- IF NO JOBS -->
+    <div th:if="${#lists.isEmpty(jobs)}" style="text-align:center; color:#cbd5e1;">
+        ❌ No jobs available. Please add jobs.
+    </div>
+
+    <!-- JOB LIST -->
+    <div th:each="job : ${jobs}" class="card">
+
+        <div class="title" th:text="${job.title}"></div>
+
+        <div class="company" th:text="${job.company}"></div>
+
+        <div th:text="'📍 ' + ${job.location}"></div>
+
+        <div th:text="'💰 ' + ${job.salary}"></div>
+
+        <div th:text="'🧠 ' + ${job.experience}"></div>
+
+        <p th:text="${job.description}"></p>
+
+        <button class="btn">Apply Now</button>
+
+    </div>
+
+</div>
+
+</body>
+</html>

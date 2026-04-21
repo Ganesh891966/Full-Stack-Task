@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Add Job</title>
+</head>
+<body>
+
+<h2>Add Job</h2>
+
+<form th:action="@{/save-job}" th:object="${job}" method="post">
+
+    <label>Title:</label>
+    <input type="text" th:field="*{title}" required><br><br>
+
+    <label>Company:</label>
+    <input type="text" th:field="*{company}" required><br><br>
+
+    <label>Location:</label>
+    <input type="text" th:field="*{location}" required><br><br>
+
+    <label>Salary:</label>
+    <input type="text" th:field="*{salary}"><br><br>
+
+    <label>Experience:</label>
+    <input type="text" th:field="*{experience}"><br><br>
+
+    <label>Description:</label><br>
+    <textarea th:field="*{description}"></textarea><br><br>
+
+    <button type="submit">Save Job</button>
+</form>
+
+<a href="/dashboard">Back</a>
+
+</body>
+</html>
